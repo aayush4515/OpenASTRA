@@ -1,0 +1,1507 @@
+## Project ASTRA — Autonomous Space Telehealth & Risk Assessment
+
+### NASA Space Apps Challenge 2026
+
+## 1. Your Role and Mission
+
+You are a senior full-stack software engineer, AI/ML engineer, 3D visualization developer, and UI/UX designer.
+
+Your task is to **design, implement, integrate, test, and document a complete working software prototype** for the NASA Space Apps Challenge 2026.
+
+Project name: **ASTRA — Autonomous Space Telehealth & Risk Assessment**
+
+Challenge: **Create Health Monitoring Software for Astronauts on Space Missions**
+
+Build a visually impressive, technically credible, offline-first astronaut health-monitoring application that combines:
+
+- An interactive 3D astronaut health-assessment booth
+- Real webcam-based astronaut identification
+- Real facial landmark and historical change analysis
+- Simulated medical equipment and sensor integrations
+- Voice-assisted health check-ins
+- Experimental biochemical odor fingerprinting
+- Weekly blood sampling simulations and reminders
+- Personalized, explainable health anomaly detection
+- Interactive health dashboards and a human body visualization
+- Health guidance and follow-up assessments
+- Emergency assistance
+- A simulated Earth-based Mission Control dashboard
+- Local SQLite persistence
+
+The application must be a **single coherent software product**, not separate disconnected demos.
+
+The central user experience is:
+
+**An astronaut enters a health-monitoring station, is identified, completes an automated assessment, and receives personalized health insights and guidance. Relevant reports are subsequently shared with Mission Control through a simulated communication system.**
+
+Because we do not have access to physical medical sensors, the application must combine genuine software functionality with interactive hardware simulations.
+
+### Critical implementation instruction
+
+Do not stop after providing a plan or writing project documentation.
+
+You are expected to create actual application files, implement functional features, run the project, fix errors, and test the workflows.
+
+Work incrementally. First establish a working end-to-end vertical slice, then expand it into the complete application.
+
+If this repository already contains code, inspect it before making changes. Preserve useful existing work and follow the established conventions where reasonable.
+
+Make reasonable engineering decisions independently rather than repeatedly asking for clarification.
+
+---
+
+# 2. Core Product Philosophy
+
+ASTRA must feel like believable software for a future deep-space mission.
+
+The application should emphasize four core capabilities:
+
+### A. Contactless and automated assessment
+
+Minimize unnecessary manual input.
+
+Use real webcam input for facial identification and facial landmark analysis. Other proposed equipment will use realistic simulated data.
+
+### B. Personalized health intelligence
+
+Each astronaut has their own health profile, historical observations, personal baselines, and longitudinal measurements.
+
+Health assessments should consider changes relative to the astronaut's own baseline, not only generalized reference ranges.
+
+### C. Actionable health guidance
+
+The software must translate measurements into understandable observations, follow-up questions, recommended assessments, and appropriate escalation pathways.
+
+It must not claim to diagnose medical conditions from unvalidated sensor outputs.
+
+### D. Earth-independent operation
+
+The software must operate locally without depending on an external database, cloud inference service, or continuous communication with Earth.
+
+Mission Control communications will be simulated.
+
+---
+
+# 3. Required Technology Stack
+
+Use the following stack unless there is a strong technical reason for a small adjustment.
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Three.js
+- React Three Fiber
+- @react-three/drei
+- Motion / Framer Motion
+- Recharts
+- Lucide React icons
+
+## Backend
+
+- Python 3.11+
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- SQLite
+- NumPy
+- pandas
+- scikit-learn
+
+## Computer Vision
+
+- OpenCV
+- MediaPipe for facial landmarks
+- A suitable local facial-embedding or face-matching implementation, if feasible
+
+Prefer technically maintainable and locally executable implementations.
+
+If facial identity matching cannot be made reliable in the target environment, preserve real landmark tracking and provide a clear, functional manual identity-confirmation fallback. Do not misrepresent face detection as verified identity recognition.
+
+## Voice Input
+
+Prefer a genuinely local speech-recognition implementation.
+
+If a local model is impractical, implement typed responses and button controls as reliable first-class alternatives. Browser speech recognition that may require a cloud connection must not be the only input method or be represented as offline-capable.
+
+## Storage
+
+Use **SQLite exclusively**.
+
+No Firebase, Supabase, MongoDB Atlas, hosted PostgreSQL, or externally hosted database.
+
+Use a structured data-access layer and migrations or reliable schema initialization.
+
+## Deployment
+
+The complete system must run locally on a development computer.
+
+It may require downloading dependencies during setup, but core functionality must operate without internet access after installation and local model assets are available.
+
+Do not require API keys or paid cloud services.
+
+---
+
+# 4. Product Visual Identity and Design Requirements
+
+This is a NASA hackathon project. Presentation quality matters enormously.
+
+Create a professional, futuristic, visually immersive interface inspired by:
+
+- Spacecraft operations software
+- Mission-control interfaces
+- Scientific monitoring dashboards
+- Medical diagnostic workstations
+- Near-future human spaceflight technology
+
+Avoid generic admin-dashboard styling.
+
+## Visual direction
+
+Use a sophisticated dark interface with restrained colors:
+
+- Deep navy and near-black backgrounds
+- Cyan and electric-blue highlights
+- White and muted-gray typography
+- Green for reassuring or completed states
+- Amber for caution
+- Red for critical alerts
+
+Use clear typography, soft glows, subtle grid patterns, translucent instrumentation panels, and fluid interactions where appropriate.
+
+Do not sacrifice readability or accessibility for visual effects.
+
+Animations should feel purposeful and connected to actual system state.
+
+## UI quality requirements
+
+- Responsive layout
+- Smooth navigation
+- Well-defined page hierarchy
+- Readable data labels and units
+- Clear sensor status indicators
+- Loading, error, empty, and completion states
+- Keyboard-accessible controls
+- Accessible labels and sufficient contrast
+- Graceful handling of denied camera or microphone permissions
+- Reduced-motion support where practical
+
+Avoid dead buttons, fake interactions, and decorative widgets that imply functionality they do not provide.
+
+All navigation must work.
+
+---
+
+# 5. Application Architecture
+
+Use a modular architecture with clear separation between:
+
+1. Frontend presentation
+2. 3D booth and animation engine
+3. Camera and microphone input
+4. Sensor abstraction layer
+5. Health check-in orchestration
+6. SQLite persistence
+7. Personalized analysis
+8. Guidance and emergency protocols
+9. Scheduling and reminders
+10. Mission Control communication simulation
+
+A suggested project structure:
+
+```text
+astra/
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── features/
+│   │   │   ├── booth/
+│   │   │   ├── identity/
+│   │   │   ├── facial-analysis/
+│   │   │   ├── sensors/
+│   │   │   ├── check-in/
+│   │   │   ├── voice/
+│   │   │   ├── dashboard/
+│   │   │   ├── health-intelligence/
+│   │   │   ├── voc/
+│   │   │   ├── blood-tests/
+│   │   │   ├── emergency/
+│   │   │   └── mission-control/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── styles/
+│   └── package.json
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── api/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   │   ├── sensors/
+│   │   │   ├── facial/
+│   │   │   ├── health/
+│   │   │   ├── anomalies/
+│   │   │   ├── guidance/
+│   │   │   ├── scheduling/
+│   │   │   └── communications/
+│   │   ├── database/
+│   │   └── seed/
+│   ├── tests/
+│   └── requirements.txt
+├── docs/
+├── scripts/
+└── README.md
+```
+
+You may adjust this structure as needed, but maintain modularity and avoid implementing everything in one giant component or backend file.
+
+---
+
+# 6. Feature 1 — Interactive 3D Astronaut Health Booth
+
+This is the visual centerpiece of the application.
+
+Build an interactive, animated 3D health-monitoring station using React Three Fiber and Three.js.
+
+## Physical concept
+
+The station should look like a compact spacecraft medical assessment area.
+
+Include visual representations of:
+
+- An astronaut standing inside or in front of the assessment station
+- A mounted facial-recognition camera
+- Facial scanning equipment
+- A thermal sensing module
+- A wearable synchronization module
+- A medical vitals measurement module
+- A microgravity-compatible body-mass measurement concept
+- An experimental electronic-nose / VOC sensor
+- A weekly blood sampling and portable analysis module
+- A digital information display
+
+Do not include bone-density scanning hardware.
+
+## 3D interactions
+
+Allow users to:
+
+- Rotate or orbit the camera
+- Zoom within sensible limits
+- Select equipment
+- Inspect sensor descriptions
+- Begin a check-in
+- Observe animated measurement collection
+- Transition from the virtual station to real assessment screens
+
+Use realistic-looking geometry, materials, lighting, and camera motion.
+
+If suitable 3D model assets are not available, build a coherent station using procedural Three.js geometry rather than substituting a static screenshot.
+
+Include a fallback if WebGL is unavailable.
+
+## Critical functional requirement
+
+The booth animation must be integrated with the application.
+
+For example:
+
+1. The check-in starts.
+2. The facial camera module activates.
+3. The actual webcam capture process begins.
+4. The virtual wearable scanner activates.
+5. The simulated wearable adapter returns measurements.
+6. The corresponding animation finishes.
+7. The measurements are persisted to SQLite.
+8. The application proceeds to the next step.
+
+The 3D animations must be driven by actual state transitions rather than arbitrary timers disconnected from the workflow.
+
+---
+
+# 7. Feature 2 — Facial Recognition and Astronaut Identification
+
+Use the computer's actual webcam.
+
+## Enrollment
+
+Allow astronauts to create a local profile and enroll for facial identification.
+
+Use a short enrollment workflow with camera permission, face detection, image-quality checks, and explicit consent.
+
+Store appropriately derived local biometric reference data if implementing actual face matching.
+
+Avoid retaining raw facial images by default. If snapshots are needed for the visual comparison feature, make that optional and clearly consent-based.
+
+## Identification
+
+When a registered astronaut begins check-in:
+
+1. Request webcam access.
+2. Capture the live camera stream.
+3. Detect the presence of a face.
+4. Attempt local face matching.
+5. Show the likely astronaut profile.
+6. Require confirmation when matching confidence is insufficient or ambiguous.
+7. Retrieve the astronaut's stored health history.
+
+Provide manual astronaut selection if recognition fails.
+
+Never claim a recognized identity if the system has only detected a face.
+
+Allow camera access to be stopped and release the camera when no longer needed.
+
+---
+
+# 8. Feature 3 — Facial Landmark and Anomaly Analysis
+
+Use live webcam input and MediaPipe facial landmarks.
+
+Analyze observable features such as:
+
+- Eye-region geometry
+- Relative eyelid opening
+- Left-right facial asymmetry
+- Eyebrow position
+- Mouth alignment
+- Head orientation
+- Other facial landmark measurements supported reliably by the implementation
+
+Optionally explore visible swelling-related proxies if scientifically defensible, but do not claim that a standard webcam accurately measures edema.
+
+Do not claim to detect intracranial pressure, retinal abnormalities, stroke, or other medical diagnoses from ordinary facial video.
+
+## Historical comparison
+
+For each astronaut:
+
+- Store standardized landmark-derived features
+- Associate observations with check-in timestamps
+- Track change over time
+- Compare against that astronaut's previous valid measurements
+- Highlight unusual changes
+- Display measurements and their confidence or quality indicators
+
+Account for lighting, camera angle, distance, expression, and head position.
+
+Do not compare measurements when capture quality is inadequate.
+
+## Visualization
+
+Show:
+
+- Live webcam view
+- Optional face-landmark overlay
+- Current landmark observations
+- Historical change charts
+- A visual indication of what changed
+- Clear explanations of limitations
+
+Example message:
+
+"Left eyelid opening differs from your established reference measurements. This could be caused by camera positioning, facial expression, or a real physical change. Repeat the measurement under consistent conditions."
+
+If baseline history is insufficient, indicate that more measurements are needed.
+
+---
+
+# 9. Feature 4 — Simulated Medical Sensors
+
+Build a modular sensor adapter framework.
+
+The same data-ingestion API should support future real hardware and current simulated devices.
+
+## Sensor categories
+
+Implement simulated readings for:
+
+- Heart rate
+- Blood pressure
+- Peripheral oxygen saturation
+- Body temperature
+- Body mass
+- Activity
+- Sleep duration and quality
+- Relevant spacecraft environmental measurements
+
+Optional environmental data:
+
+- Cabin CO₂
+- Oxygen partial pressure
+- Ambient temperature
+- Radiation exposure records
+
+Environmental data should be kept distinct from astronaut body measurements.
+
+## Standardized measurement contract
+
+Each measurement should include fields such as:
+
+```json
+{
+  "astronaut_id": "AST-001",
+  "metric": "heart_rate",
+  "value": 76,
+  "unit": "bpm",
+  "timestamp": "2026-11-14T12:00:00Z",
+  "source": "simulated_wearable",
+  "quality": "good",
+  "simulated": true
+}
+```
+
+Create a generic adapter interface with methods similar to:
+
+```python
+class SensorAdapter:
+    def connect(self): ...
+    def collect(self): ...
+    def validate(self, reading): ...
+    def disconnect(self): ...
+```
+
+Adapt the exact interface for Python typing and production-quality design.
+
+Implement a sensor registry and standardized ingestion service.
+
+## Simulation requirements
+
+- Deterministic demo scenarios
+- Adjustable sensor outputs
+- Plausible values with explicit simulation labels
+- Timestamped readings
+- Fault and unavailable-device states
+- Sensor progress animations
+- Backend persistence
+
+Include a developer/demo control to select predefined sensor scenarios.
+
+Do not randomly generate arbitrary new results every time a dashboard renders.
+
+---
+
+# 10. Feature 5 — Voice-Assisted Health Check-in
+
+Develop an interactive questionnaire for subjective health indicators.
+
+Example questions:
+
+- How are you feeling today?
+- How would you rate your health from 1 to 10?
+- Are you experiencing unusual fatigue?
+- How was your sleep?
+- Are you experiencing pain or discomfort?
+- How would you describe your mood?
+- Have you noticed any new symptoms?
+
+Use voice input if local speech-recognition dependencies are available.
+
+Always provide text and selectable response options as fallbacks.
+
+## Adaptive assessment
+
+The questionnaire must respond to previously collected observations.
+
+For example:
+
+If an astronaut reports dizziness, ask appropriate follow-up questions about the timing, associated symptoms, and available measurements.
+
+If sleep duration has fallen substantially relative to their baseline, ask about sleep quality and fatigue.
+
+Keep the question engine separate from UI code.
+
+Use structured, predefined branching rules.
+
+Do not rely on unverified AI-generated medical questions as the sole clinical assessment logic.
+
+Store responses and timestamps in SQLite.
+
+---
+
+# 11. Feature 6 — Experimental Biochemical Odor Fingerprinting
+
+Implement a simulated electronic-nose system that tracks skin volatile organic compound (VOC) fingerprints.
+
+This is an experimental research feature.
+
+## Important scientific distinction
+
+The system is not an actual hormone detector.
+
+OpenPOM predicts odor-related molecular descriptors from molecular structure; it cannot directly infer hormone concentrations from raw electronic-nose readings.
+
+Do not claim the software can detect cortisol, testosterone, estrogen, or progesterone levels from ordinary body odor.
+
+Instead, demonstrate **individual VOC fingerprint change detection**.
+
+## Implementation
+
+Build a simulated electronic-nose sensor adapter.
+
+Generate structured VOC feature vectors or simulated e-nose channel readings.
+
+Track:
+
+- Individual baseline chemical profiles
+- Current fingerprint
+- Changes across mission days
+- Relative deviations from baseline
+- Collection conditions
+- Environmental factors that could affect readings
+
+Use suitable statistical anomaly detection, with simple, explainable methods preferred initially.
+
+Possible models:
+
+- Robust standardized deviations
+- Isolation Forest
+- PCA for exploratory visualization
+
+Clearly label any synthetic profiles.
+
+## UI
+
+Show:
+
+- Animated VOC sensor activation
+- Chemical fingerprint visualization
+- Historical pattern comparison
+- Detected deviations
+- Explanations of possible measurement interference
+- Recommended repeat measurement if needed
+
+Example:
+
+"Your current VOC fingerprint differs from your established baseline. Environmental contamination, hygiene products, physiological changes, or sensor variation may contribute. Further assessment is required before interpreting this as a health concern."
+
+## Research integration
+
+Design the module so published datasets or identified molecules can be integrated later.
+
+OpenPOM integration is optional and must not block implementation.
+
+If used, isolate it behind a dedicated molecular-description service, without treating its outputs as hormone estimates.
+
+---
+
+# 12. Feature 7 — Weekly Blood Sampling and Reminders
+
+Replace the previously discussed bone-density hardware concept with a **weekly simulated blood-testing workflow**.
+
+## Scheduling
+
+Each astronaut should have:
+
+- Last completed blood test
+- Next scheduled test
+- Test status
+- Reminder state
+- Historical results
+
+Default demonstration frequency: every seven days.
+
+Make the schedule configurable; do not imply this represents an official NASA medical protocol.
+
+Implement reminders that persist in SQLite.
+
+Display due and overdue tests on the dashboard.
+
+In-app reminders must work while the application is running and when it is reopened. Do not claim a background notification will fire while all application processes are stopped unless that capability is actually implemented.
+
+## Animated workflow
+
+The 3D booth should show:
+
+1. Notification that a weekly test is due.
+2. Astronaut begins the test.
+3. Manual sample-collection instructions are displayed.
+4. A simulated sample is transferred to an onboard analyzer.
+5. The virtual analyzer processes the sample.
+6. Results become available.
+7. Results are stored in SQLite.
+8. The next scheduled date is updated.
+
+Do not depict automated blood extraction as an already working capability.
+
+## Simulated laboratory indicators
+
+Provide a small, clearly defined illustrative laboratory panel, such as:
+
+- Hemoglobin
+- Glucose
+- Selected blood-count indicators
+
+Only include biomarkers consistent with the capabilities of the hypothetical analyzer.
+
+Do not imply that one analyzer can measure everything.
+
+## Dashboard integration
+
+Show:
+
+- Latest values
+- Previous values
+- Longitudinal trends
+- Measurement units
+- Source and simulation labels
+- Next scheduled test
+- Notable changes requiring review
+
+Ensure lab simulation outcomes can feed into the personalized analysis engine.
+
+---
+
+# 13. Feature 8 — Personalized AI Health Intelligence
+
+This is a core technical differentiator.
+
+Implement a health-assessment engine that maintains an individualized baseline for each astronaut.
+
+Avoid training a separate large neural network from scratch for every astronaut.
+
+Instead, combine:
+
+1. A shared analysis engine
+2. Per-astronaut historical baselines
+3. Longitudinal change detection
+4. Multivariate pattern analysis
+5. Predefined safety and escalation rules
+
+## Baselines
+
+For each monitored metric, compute suitable statistics such as:
+
+- Rolling median
+- Historical variability
+- Recent trend
+- Difference from baseline
+- Robust anomaly score
+
+Use appropriate measurement contexts. For example, do not compare post-exercise heart rate directly with a resting-heart-rate baseline.
+
+Handle missing measurements, sensor errors, insufficient history, and outliers.
+
+Do not automatically treat a newly observed abnormal measurement as part of an updated normal baseline.
+
+## Multimodal analysis
+
+Correlate observations across:
+
+- Vitals
+- Sleep
+- Facial features
+- Subjective questionnaire responses
+- VOC profiles
+- Laboratory measurements
+- Environmental context
+
+Example synthetic scenario:
+
+An astronaut's resting heart rate rises over several days, sleep duration declines, and fatigue increases.
+
+The system recognizes the combined departure from baseline and recommends appropriate additional assessment.
+
+Do not convert these observations directly into a disease diagnosis.
+
+## Explainability
+
+Every flagged observation should provide:
+
+- The measurements involved
+- The historical comparison
+- Why the change was flagged
+- Whether data is missing or uncertain
+- Recommended next steps
+- Data provenance
+
+Clearly distinguish statistical anomalies from medical emergencies.
+
+## Personalized health profile
+
+Maintain a per-astronaut health profile that evolves through historical check-ins.
+
+Store the baselines and sufficient historical data locally.
+
+Make the analysis reproducible from stored measurements.
+
+---
+
+# 14. Feature 9 — Health Dashboard and Interactive Body Model
+
+Create a detailed personal health dashboard.
+
+## Dashboard content
+
+Include:
+
+- Astronaut identity and mission details
+- Most recent check-in
+- Current observations
+- Vital-sign cards
+- Longitudinal health charts
+- Personalized baseline comparisons
+- Facial change history
+- Sleep/activity trends
+- VOC fingerprint history
+- Blood-test results
+- Reminders
+- Health guidance
+- Recent alerts
+
+Use clear, consistent visual indicators.
+
+Do not collapse all health information into a misleading universal "health score" without explaining the model.
+
+## Interactive body visualization
+
+Create an interactive anatomical or stylized human-body diagram.
+
+Allow selection of major regions such as:
+
+- Head and eyes
+- Cardiovascular system
+- Respiratory system
+- Musculoskeletal system
+- General well-being
+
+Selecting a body region should display relevant monitored indicators and observations.
+
+Use a functional interactive SVG or suitable 3D body visualization, whichever can be implemented reliably.
+
+The health booth itself must remain 3D.
+
+## Health history
+
+Users should be able to inspect previous check-ins.
+
+Implement date navigation, recent history, and trend visualizations.
+
+Show real versus simulated measurements clearly.
+
+---
+
+# 15. Feature 10 — Health Guidance and Recommendations
+
+Develop an explainable decision-support system.
+
+Guidance should be understandable to astronauts without specialized medical training.
+
+Implement a structured library of predefined guidance content.
+
+Examples of categories:
+
+- Sleep and fatigue
+- Hydration and nutrition
+- Physical exercise adherence
+- Cardiovascular observations
+- Temperature-related concerns
+- Vision-related observations
+- Psychological well-being
+- Repeat or confirm a measurement
+- Seek crew medical assistance
+
+Use clear explanations of why a follow-up is suggested.
+
+Separate:
+
+- Routine preventive advice
+- Measurement confirmation
+- Nonurgent crew review
+- Urgent escalation
+
+The system must not invent medical treatment procedures or present experimental ML outputs as clinical diagnoses.
+
+Use reviewed, traceable medical-reference content where available. Mark demonstration-only guidance clearly until clinically reviewed.
+
+---
+
+# 16. Feature 11 — Emergency Assistance Mode
+
+Create a distinct, immediately accessible emergency mode.
+
+Emergency mode must be available from all major application screens.
+
+It must not require facial recognition or completion of a routine check-in.
+
+## Functionality
+
+- Prominent emergency activation
+- Ability to select or report a concerning event
+- Immediate on-screen crew-notification state
+- Clear next actions from predefined protocol content
+- Relevant patient information and recent measurements
+- Emergency event recording
+- Report preparation for Mission Control
+- Offline operation
+
+Include a scenario involving an astronaut experiencing chest pain and collapse, reflecting the challenge's introductory example.
+
+The emergency flow must prioritize alerting other crew members and following approved onboard emergency procedures.
+
+Do not invent medication doses, invasive procedures, or diagnostic conclusions.
+
+This is a demonstration of an emergency decision-support workflow, not an operationally certified medical device.
+
+---
+
+# 17. Feature 12 — Mission Control Dashboard
+
+Create a separate Mission Control view within the same application.
+
+It represents the health-monitoring interface used by ground-based flight surgeons and mission personnel.
+
+## Features
+
+- Crew roster
+- Recent health check-ins
+- Health trends
+- Flagged observations
+- Emergency notifications
+- Recent laboratory results
+- Communication status
+- Report history
+
+## Simulated communications
+
+Implement a local message queue.
+
+Reports should transition through states such as:
+
+- Created
+- Queued
+- In transit
+- Delivered
+- Acknowledged
+
+Support configurable communication delay and simulated connection loss.
+
+The app must show that astronaut health analysis remains operational even when communication with Earth is unavailable.
+
+Messages should be persisted locally.
+
+Do not use an actual external server to simulate Earth unless a second local process is needed for the design. Prefer a single locally hosted application for simplicity.
+
+## Demonstration controls
+
+Provide a demo panel that can:
+
+- Toggle the simulated Earth link
+- Change simulated communication delay
+- Trigger a report
+- Observe queued messages
+- Resume communication
+- Confirm delivery and acknowledgment
+
+These controls should affect actual queued-message records.
+
+---
+
+# 18. Feature 13 — SQLite Persistence and Offline Operation
+
+SQLite is the system's sole database.
+
+Suggested data entities:
+
+```text
+astronauts
+facial_enrollments
+facial_observations
+checkins
+sensor_readings
+questionnaire_responses
+personal_baselines
+voc_measurements
+blood_tests
+blood_test_results
+reminders
+health_observations
+guidance_records
+emergency_events
+communication_messages
+audit_events
+```
+
+Design proper relationships, indexes, and constraints.
+
+Use UUIDs or appropriate unique identifiers.
+
+Every reading must record:
+
+- Astronaut
+- Measurement type
+- Value and unit
+- Timestamp
+- Source
+- Simulation status
+- Quality/validity metadata
+
+Preserve the distinction between:
+
+- Real sensor readings
+- Simulated readings
+- User-reported data
+- Computed observations
+- Experimental predictions
+
+Never silently mix synthetic and genuine medical data.
+
+## Offline requirements
+
+- Local database
+- Locally available application assets
+- No runtime dependency on cloud services
+- Local health-analysis engine
+- Local sensor simulation
+- Local communications simulation
+- Graceful handling of unavailable webcam or microphone
+
+Protect sensitive records where practical, avoid exposing facial templates unnecessarily, and document data retention and deletion behavior.
+
+Implement basic access separation between astronaut and Mission Control views, even if the demo uses simplified local role selection.
+
+---
+
+# 19. End-to-End Health Check-in State Machine
+
+Implement a proper check-in orchestrator.
+
+Suggested states:
+
+```text
+IDLE
+IDENTIFYING
+IDENTITY_CONFIRMED
+FACIAL_SCAN
+SENSOR_COLLECTION
+VOC_SCAN
+QUESTIONNAIRE
+PROCESSING
+RESULTS_READY
+COMPLETED
+CANCELLED
+FAILED
+```
+
+The weekly blood test should be an optional additional workflow triggered when due, not a required step in every daily check-in.
+
+Support transitions, loading indicators, error handling, and retry where appropriate.
+
+Persist completed readings and the check-in record transactionally.
+
+Avoid leaving inconsistent records after cancellation or partial failure.
+
+Ensure UI animation state, backend measurement state, and displayed results remain synchronized.
+
+---
+
+# 20. Demo Data and Scenario Engine
+
+Include seeded synthetic astronaut profiles and multiweek health histories.
+
+This is crucial because longitudinal analysis would otherwise be empty on first launch.
+
+Create at least three fictional astronaut profiles, each with different baseline characteristics.
+
+Include deterministic demonstration scenarios.
+
+### Scenario A — Normal assessment
+
+An astronaut completes a check-in.
+
+Measurements are consistent with their personal baseline.
+
+The dashboard displays routine observations.
+
+### Scenario B — Gradual pattern change
+
+An astronaut exhibits several days of changing vital signs and sleep metrics.
+
+The analysis flags meaningful deviations and asks targeted follow-up questions.
+
+### Scenario C — Facial change
+
+The camera processes current facial landmarks and compares them with historical reference measurements.
+
+Demonstrate the system's ability to display a detectable geometric difference without asserting a medical diagnosis.
+
+### Scenario D — Experimental VOC anomaly
+
+A simulated electronic-nose reading differs significantly from the astronaut's previous chemical fingerprint.
+
+The dashboard highlights the deviation and notes the experimental nature of the analysis.
+
+### Scenario E — Weekly blood test
+
+A blood-test reminder becomes due.
+
+The user performs the simulated collection workflow.
+
+Results are saved and shown in the astronaut's history.
+
+### Scenario F — Medical emergency
+
+An emergency scenario is activated.
+
+Crew escalation, guided response, and Mission Control message preparation are demonstrated.
+
+### Scenario G — Communication outage
+
+Mission Control communication is disabled.
+
+Health check-ins and analysis continue locally.
+
+Reports remain queued and are delivered when the simulated connection is restored.
+
+Demo scenarios must produce reproducible outcomes, not depend on uncontrolled random generation.
+
+Provide a clearly labeled demo mode and a way to reset the seeded demonstration database safely.
+
+---
+
+# 21. Application Pages
+
+Implement the following main routes.
+
+## / — Mission Home
+
+A visually compelling main screen showing:
+
+- Mission overview
+- 3D booth preview or visual entry point
+- Crew summary
+- Current alerts
+- Check-in reminders
+- Weekly lab reminders
+- Start Check-in button
+- Navigation to other modules
+
+## /booth — Interactive Health Booth
+
+The full 3D health station.
+
+Sensor animations and check-in orchestration.
+
+Webcam identification and automatic data-collection workflow.
+
+## /astronaut/ — Astronaut Dashboard
+
+Personal health information, interactive body model, historical measurements, charts, and reminders.
+
+## /intelligence/ — Health Intelligence
+
+Detailed personalized anomaly analysis, follow-up observations, and explanations.
+
+## /emergency — Emergency Assistance
+
+Immediate access to emergency workflows and crew escalation.
+
+## /mission-control — Mission Control
+
+Crew-level overview, reports, alerts, and simulated communications.
+
+Additional routes for profile enrollment, preferences, and settings are acceptable.
+
+---
+
+# 22. API and Data Integration
+
+Implement REST endpoints through FastAPI.
+
+Suggested endpoint categories:
+
+```text
+/api/astronauts
+/api/enrollment
+/api/checkins
+/api/facial-observations
+/api/sensors
+/api/questionnaires
+/api/voc
+/api/blood-tests
+/api/reminders
+/api/health-analysis
+/api/guidance
+/api/emergencies
+/api/communications
+/api/mission-control
+/api/demo
+```
+
+Use consistent Pydantic request and response schemas.
+
+Validate all incoming data.
+
+Use meaningful HTTP status codes and structured error responses.
+
+Avoid unnecessary frontend-backend duplication of business logic.
+
+Add typed frontend API wrappers and clean loading/error handling.
+
+For example, a check-in completion should:
+
+1. Validate the collected observations.
+2. Save the check-in and its readings.
+3. Run the personalized assessment.
+4. Persist generated observations and guidance.
+5. Create communication records where appropriate.
+6. Return the completed assessment to the frontend.
+
+Implement this as a functioning workflow, not a collection of unrelated API calls with hardcoded responses.
+
+---
+
+# 23. Scientific and Medical Safety Requirements
+
+This project is a technology demonstrator, not a clinically validated medical device.
+
+This distinction must be reflected throughout the implementation.
+
+### Requirements
+
+- Do not diagnose disease from ordinary facial images.
+- Do not claim to measure hormones using simulated body odor.
+- Do not claim to perform actual blood analysis.
+- Do not present simulated readings as real measurements.
+- Do not generate unsupported medical treatment instructions.
+- Do not use anomaly scores as substitutes for clinical emergency criteria.
+- Do not invent official NASA medical thresholds.
+- Do not imply NASA endorsement or flight readiness.
+- Do not make emergency assistance dependent on an experimental model.
+
+Personalized deviations should lead to understandable investigation recommendations rather than definitive diagnoses.
+
+Provide brief, unobtrusive disclaimers where relevant.
+
+Use NASA's published Human Research Program material as the scientific foundation for the project's risk categories and explanations.
+
+Useful references:
+
+- [https://www.nasa.gov/hrp/hazards/](https://www.nasa.gov/hrp/hazards/)
+- [https://www.nasa.gov/hrp/risks/](https://www.nasa.gov/hrp/risks/)
+- [https://www.nasa.gov/hrp/ongoing-hrp-research/](https://www.nasa.gov/hrp/ongoing-hrp-research/)
+- [https://www.nasa.gov/ames/space-biosciences/bioengineering-branch/e-nose/](https://www.nasa.gov/ames/space-biosciences/bioengineering-branch/e-nose/)
+
+If source information is unavailable, do not invent research findings.
+
+---
+
+# 24. Implementation Plan
+
+Implement the project in milestones.
+
+You should proceed through these milestones while keeping the application runnable.
+
+## Milestone 1 — Foundation
+
+- Inspect existing repository.
+- Initialize frontend and backend.
+- Establish shared configuration.
+- Implement SQLite database.
+- Define schemas and API types.
+- Create seeded astronaut profiles.
+- Build navigation and the visual design system.
+- Implement basic Mission Home.
+
+**Acceptance:** Application starts locally, frontend communicates with backend, and persisted astronaut profiles load.
+
+## Milestone 2 — 3D Booth and Check-in Flow
+
+- Build a real Three.js health booth.
+- Add interactive equipment.
+- Add animations.
+- Implement check-in state machine.
+- Create simulated sensor adapters.
+- Persist check-ins and sensor results.
+
+**Acceptance:** A user can start a check-in, watch equipment activation, collect simulated readings, and view saved results.
+
+## Milestone 3 — Live Webcam and Facial Analysis
+
+- Add webcam access.
+- Add facial detection.
+- Add enrollment and profile matching where feasible.
+- Provide identity confirmation and manual fallback.
+- Add facial landmark measurements.
+- Store facial observation history.
+- Implement historical change comparison.
+
+**Acceptance:** The application can use a real webcam, identify or manually select an enrolled astronaut, calculate landmark observations, and compare them to stored references.
+
+## Milestone 4 — Voice and Adaptive Questionnaire
+
+- Create subjective health questionnaire.
+- Implement local voice input if available.
+- Implement text/button fallback.
+- Add branching follow-up questions.
+- Save responses to SQLite.
+
+**Acceptance:** A completed questionnaire is linked to the check-in and influences assessment results.
+
+## Milestone 5 — Health Intelligence and Dashboard
+
+- Implement personal baselines.
+- Add longitudinal statistics.
+- Add anomaly detection.
+- Add multimodal analysis rules.
+- Build interactive health charts.
+- Build interactive body visualization.
+- Add explainable observations and guidance.
+
+**Acceptance:** Different historical patterns produce meaningfully different results for different astronauts.
+
+## Milestone 6 — VOC and Weekly Blood Testing
+
+- Implement simulated VOC sensor.
+- Implement VOC fingerprint comparison.
+- Add visualization and anomaly detection.
+- Add weekly blood-test scheduling.
+- Add simulated blood collection and analysis.
+- Integrate results with SQLite and the dashboard.
+
+**Acceptance:** Both experimental VOC observations and weekly lab results are saved and accessible in each astronaut's history.
+
+## Milestone 7 — Emergency and Mission Control
+
+- Implement emergency activation.
+- Add predefined response workflows.
+- Add crew-notification simulation.
+- Build Mission Control dashboard.
+- Implement delay-tolerant local message queue.
+- Add communication outage controls.
+
+**Acceptance:** Emergency events and health reports can be queued, displayed, transmitted through simulated delays, and acknowledged.
+
+## Milestone 8 — Polish, Integration, and Testing
+
+- Improve 3D visuals and animation timing.
+- Ensure smooth frontend-backend integration.
+- Add error states and fallbacks.
+- Verify all routes.
+- Add sample demo scenarios.
+- Test offline behavior.
+- Write documentation.
+- Run automated tests.
+- Fix identified bugs.
+
+**Acceptance:** The complete demo works end to end without requiring a hosted service.
+
+---
+
+# 25. Testing Requirements
+
+Do not treat successful compilation as sufficient evidence that the product works.
+
+Implement tests for:
+
+### Backend
+
+- Database initialization
+- Astronaut CRUD operations
+- Check-in persistence
+- Sensor validation
+- Personalized baseline calculations
+- Anomaly detection
+- VOC data processing
+- Blood-test reminders
+- Emergency event creation
+- Communication queue transitions
+
+### Frontend
+
+- Route navigation
+- Sensor collection progress
+- Profile selection
+- Questionnaire completion
+- Dashboard rendering
+- Weekly blood-test workflow
+- Emergency interaction
+- Mission Control delivery states
+
+### Failure cases
+
+- Webcam unavailable
+- Camera permission denied
+- No face detected
+- Unknown astronaut
+- Missing baseline
+- Sensor timeout
+- Invalid measurement
+- Microphone unavailable
+- Empty database
+- Simulated communication outage
+
+Tests should be automated where practical.
+
+For hardware-related features, use mocks or controlled synthetic input in tests, but preserve live hardware paths in the application.
+
+---
+
+# 26. Deliverables
+
+The repository must contain:
+
+1. Functional React frontend
+2. Functional FastAPI backend
+3. Interactive 3D health booth
+4. Live webcam processing
+5. Simulated medical sensors
+6. Personalized analysis engine
+7. VOC fingerprint module
+8. Weekly blood-test module
+9. Health dashboard
+10. Emergency mode
+11. Mission Control simulation
+12. SQLite persistence
+13. Demo data and scenario controls
+14. Automated tests
+15. Setup documentation
+
+Create a complete README containing:
+
+- Project overview
+- Architecture
+- Technology stack
+- Installation instructions
+- How to run the frontend
+- How to run the backend
+- How to initialize the database
+- How to launch demo mode
+- How to test the application
+- Hardware requirements
+- Offline capabilities and limitations
+- Implemented versus simulated features
+- Scientific and medical limitations
+
+Also create `docs/ARCHITECTURE.md` describing system components and data flow, and `docs/DEMO.md` containing a recommended hackathon demonstration script.
+
+---
+
+# 27. Definition of Done
+
+The project is not complete until the following workflow is functional:
+
+1. Start the application locally.
+2. Open the Mission Home screen.
+3. Navigate into the interactive 3D medical booth.
+4. Start a health check-in.
+5. Access the webcam and detect a face.
+6. Identify an enrolled astronaut or confirm identity manually.
+7. Perform real facial landmark analysis.
+8. Collect simulated sensor readings through animated devices.
+9. Complete the subjective health questionnaire.
+10. Save the collected data to SQLite.
+11. Run personalized health-pattern analysis.
+12. Display results and historical trends.
+13. Show explainable observations and guidance.
+14. Demonstrate a VOC fingerprint anomaly.
+15. Complete a scheduled weekly blood-test simulation.
+16. Trigger a simulated emergency.
+17. Queue a report for Mission Control.
+18. Simulate communication loss and restoration.
+19. View the delivered report through Mission Control.
+20. Restart the application and verify that persistent information remains available.
+
+Every important UI control should produce the action it advertises.
+
+Do not label a feature as fully implemented if it is only a static mockup.
+
+---
+
+# 28. Engineering Quality Expectations
+
+Prioritize:
+
+- Clean architecture
+- Maintainable code
+- Explicit typing
+- Modular components
+- Reusable services
+- Deterministic simulation
+- Proper error handling
+- Reliable state management
+- Reproducible setup
+- Accurate data provenance
+- Sensible security and privacy controls
+- Consistent design
+
+Avoid:
+
+- Excessive hardcoding
+- Monolithic files
+- Inconsistent API schemas
+- Fake functionality
+- Unnecessary external dependencies
+- Unsupported medical claims
+- UI elements that do nothing
+- Randomly changing demo data
+- Excessive animations that interfere with usability
+
+Do not spend all development effort on visual design while neglecting backend integration.
+
+Likewise, do not build only backend functionality and leave the main 3D experience as an afterthought.
+
+Both are essential.
+
+---
+
+# 29. Execution Instructions
+
+Begin by inspecting the current working directory and determining whether an application already exists.
+
+Then:
+
+1. Briefly describe the implementation approach.
+2. Establish the project structure.
+3. Implement Milestone 1.
+4. Run relevant tests and resolve errors.
+5. Continue through subsequent milestones.
+6. Maintain working integration throughout development.
+7. Document completed functionality.
+8. Report any incomplete or simulated components accurately.
+
+Do not merely output source code in the conversation if you can edit the repository directly.
+
+Create and modify the files.
+
+Run terminal commands where available.
+
+Install required dependencies where possible.
+
+After implementation, report:
+
+- What was actually implemented
+- What was tested
+- What works with real hardware
+- What uses simulations
+- What remains incomplete
+- How to run the project
+- Suggested next development steps
+
+If execution time or tool constraints prevent implementing everything in one session, prioritize a tested, working end-to-end vertical slice over partially implemented features scattered across the repository.
+
+Do not silently skip requirements. Document unfinished functionality honestly.
+
+---
+
+# 30. Final Product Vision
+
+ASTRA should demonstrate how future astronauts could independently monitor their health during long-duration missions using a combination of:
+
+**Computer Vision + Medical Sensor Integration + Personalized AI + Behavioral Health Monitoring + Experimental Biochemical Sensing + Local Decision Support + Delayed Earth Communication.**
+
+The defining experience is:
+
+**An astronaut walks into a futuristic medical station, the station recognizes them, automated instruments collect health measurements, software analyzes changes from their personal baseline, and the astronaut receives understandable guidance while Mission Control receives relevant health reports.**
+
+Make the application feel like an actual prototype of a next-generation spacecraft medical system.
+
+It must be visually compelling enough for a NASA Space Apps presentation, technically credible enough for engineering evaluation, and sufficiently integrated that the main workflow can be demonstrated live.
+
+**Start implementing the project now.**
